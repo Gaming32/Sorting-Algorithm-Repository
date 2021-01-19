@@ -60,23 +60,25 @@ struct runlist
 };
 
 struct runlist* runlist_new(int index) {
-    struct runlist result;
-    result.index = index;
-    result.next = &result;
-    result.prev = &result;
-    result.firstLast = IS_FIRST_RUN | IS_LAST_RUN;
-    result.runCount = 1;
+    struct runlist* result = malloc(sizeof(struct runlist));
+    result->index = index;
+    result->next = result;
+    result->prev = result;
+    result->firstLast = IS_FIRST_RUN | IS_LAST_RUN;
+    result->runCount = 1;
+
+    return result;
 }
 
 void runlist_addEnd(struct runlist* runs, int index) {
-    struct runlist new;
-    new.index = index;
+    struct runlist* new = malloc(sizeof(struct runlist));
+    new->index = index;
 
     struct runlist* lastRun = runs->prev;
-    lastRun->next = &new;
-    runs->prev = &new;
+    lastRun->next = new;
+    runs->prev = new;
     lastRun->firstLast ^= IS_LAST_RUN;
-    new.firstLast |= IS_LAST_RUN;
+    new->firstLast |= IS_LAST_RUN;
 
     runs->runCount++;
 }
@@ -217,6 +219,7 @@ void runSort(struct pdmerge_data *inst, PDMERGE_TYPE* array, int length) {
 
     bye:
     free(inst->copied);
+    free(runs);
 }
 
 
