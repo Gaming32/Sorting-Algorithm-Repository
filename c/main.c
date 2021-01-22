@@ -5,8 +5,7 @@
 #include "pdmerge.h"
 
 #define LENGTH 32
-// #define SEED   time(NULL)
-#define SEED   345
+#define SEED   time(NULL)
 
 
 PDMERGE_TYPE randrange(PDMERGE_TYPE high) {
