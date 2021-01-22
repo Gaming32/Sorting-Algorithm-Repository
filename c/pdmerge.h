@@ -5,7 +5,7 @@
     #define PDMERGE_TYPE int
 #endif
 #ifndef PDMERGE_COMPARE
-    #define PDMERGE_COMPARE(a, b) (b - a)
+    #define PDMERGE_COMPARE(a, b) (a - b)
 #endif
 
 /*
@@ -52,67 +52,16 @@ SOFTWARE.
 #define IS_LAST_RUN  0b10
 
 
-struct pdmerge_data
-{
+struct pdmerge_data {
     int smallestRunSize;
     int copiedLength;
     PDMERGE_TYPE* copied;
-};
-
-
-struct runlist
-{
-    int index;
-    struct runlist* next;
-    struct runlist* prev;
-    uint8_t firstLast;
     int runCount;
 };
 
-struct runlist* runlist_new(int index) {
-    struct runlist* result = malloc(sizeof(struct runlist));
-    result->index = index;
-    result->next = result;
-    result->prev = result;
-    result->firstLast = IS_FIRST_RUN | IS_LAST_RUN;
-    result->runCount = 1;
-
-    return result;
-}
-
-void runlist_addEnd(struct runlist* runs, int index) {
-    struct runlist* new = malloc(sizeof(struct runlist));
-    new->index = index;
-
-    struct runlist* lastRun = runs->prev;
-    lastRun->next = new;
-    runs->prev = new;
-    new->next = runs;
-    new->prev = lastRun;
-
-    lastRun->firstLast ^= IS_LAST_RUN;
-    new->firstLast = 0 | IS_LAST_RUN;
-
-    runs->runCount++;
-}
-
-void runlist_remove(struct runlist* first, struct runlist* elem) {
-    elem->prev->next = elem->next->prev;
-    elem->next->prev = elem->prev->next;
-    if (elem->firstLast & IS_FIRST_RUN) {
-        elem->next->firstLast |= IS_FIRST_RUN;
-    }
-    else if (elem->firstLast & IS_LAST_RUN) {
-        elem->prev->firstLast |= IS_LAST_RUN;
-    }
-
-    first->runCount--;
-}
-
 
 void reverse(PDMERGE_TYPE* array, int i, int j) {
-    while (i < j)
-    {
+    while (i < j) {
         PDMERGE_TYPE tmp = array[i];
         array[i] = array[j];
         array[j] = tmp;
@@ -131,6 +80,28 @@ void ensureCapacity(struct pdmerge_data *inst, int length) {
 }
 
 
+void mergeUp(struct pdmerge_data *inst, PDMERGE_TYPE* array, int start, int mid, int end) {
+    ensureCapacity(inst, mid - start);
+    for (int i = 0; i < mid - start; i++) {
+        inst->copied[i] = array[i + start];
+    }
+
+    int bufferPointer = 0;
+    int left = start;
+    int right = mid;
+
+    while (left < right && right < end) {
+        if (PDMERGE_COMPARE(inst->copied[bufferPointer], array[right]) <= 0)
+            array[left++] = inst->copied[bufferPointer++];
+        else
+            array[left++] = array[right++];
+    }
+
+    while (left < right)
+        array[left++] = inst->copied[bufferPointer++];
+}
+
+
 void mergeDown(struct pdmerge_data *inst, PDMERGE_TYPE* array, int start, int mid, int end) {
     ensureCapacity(inst, end - mid);
     for (int i = 0; i < end - mid; i++) {
@@ -141,9 +112,8 @@ void mergeDown(struct pdmerge_data *inst, PDMERGE_TYPE* array, int start, int mi
     int left = mid - 1;
     int right = end - 1;
 
-    while (right > left && left >= start)
-    {
-        if (PDMERGE_COMPARE(inst->copied[bufferPointer], array[right]) <= 0)
+    while (right > left && left >= start) {
+        if (PDMERGE_COMPARE(inst->copied[bufferPointer], array[left]) >= 0)
             array[right--] = inst->copied[bufferPointer--];
         else
             array[right--] = array[left--];
@@ -155,16 +125,16 @@ void mergeDown(struct pdmerge_data *inst, PDMERGE_TYPE* array, int start, int mi
 
 
 void merge(struct pdmerge_data *inst, PDMERGE_TYPE* array, int leftStart, int rightStart, int end) {
-    // if (end - rightStart < rightStart - leftStart) {
+    if (end - rightStart < rightStart - leftStart) {
         mergeDown(inst, array, leftStart, rightStart, end);
-    // }
-    // else {
-
-    // }
+    }
+    else {
+        mergeUp(inst, array, leftStart, rightStart, end);
+    }
 }
 
 
-#define compare(a, b) PDMERGE_COMPARE(a, b) < 0
+#define compare(a, b) PDMERGE_COMPARE(a, b) <= 0
 
 #define EMPTY_RUNLIST IS_FIRST_RUN | IS_LAST_RUN
 
@@ -180,16 +150,14 @@ int identifyRun(struct pdmerge_data *inst, PDMERGE_TYPE* array, int index, int m
     index++;
 
     while (index < maxIndex) {
-        printf("index: %i\n", index);
         bool checkCmp = compare(array[index], array[index + 1]);
         if (checkCmp != cmp) {
             break;
         }
         index++;
     }
-    printf("run: %i-%i\n", startIndex, index);
 
-    if (cmp) {
+    if (!cmp) {
         reverse(array, startIndex, index);
     }
     if (index >= maxIndex) {
@@ -199,12 +167,13 @@ int identifyRun(struct pdmerge_data *inst, PDMERGE_TYPE* array, int index, int m
 }
 
 
-struct runlist* findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int maxIndex) {
-    struct runlist* runs = runlist_new(0);
+int* findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int maxIndex) {
+    int* runs = malloc((maxIndex + 2) / 2 * sizeof(int));
+    runs[0] = 0;
+    inst->runCount = 1;
 
     int lastRun = 0;
     while (lastRun != -1) {
-        printf("runcount: %i\n", runs->runCount);
         int newRun = identifyRun(inst, array, lastRun, maxIndex);
         if (newRun == -1) {
             inst->smallestRunSize = min(inst->smallestRunSize, maxIndex - lastRun + 1);
@@ -212,9 +181,7 @@ struct runlist* findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int max
         }
         inst->smallestRunSize = min(inst->smallestRunSize, newRun - lastRun + 1);
         lastRun = newRun;
-        printf("to add: %i\n", lastRun);
-        runlist_addEnd(runs, lastRun);
-        printf("added.\n");
+        runs[inst->runCount++] = lastRun;
     }
 
     return runs;
@@ -223,24 +190,18 @@ struct runlist* findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int max
 
 void runSort(struct pdmerge_data *inst, PDMERGE_TYPE* array, int length) {
     inst->smallestRunSize = INT_MAX;
-    struct runlist *runs = findRuns(inst, array, length - 1);
+    int* runs = findRuns(inst, array, length - 1);
     // goto bye;
     inst->copiedLength = inst->smallestRunSize;
     inst->copied = malloc(inst->smallestRunSize * sizeof(PDMERGE_TYPE));
 
-    while (runs->runCount > 1)
-    {
-        struct runlist* currun = runs;
-        for (int i = 0; i < runs->runCount - 1; i += 2) {
-            struct runlist* mid = currun->next;
-            int end = i + 2 >= runs->runCount ? length : mid->next->index;
-            merge(inst, array, currun->index, mid->index, end);
-            currun = mid->next;
+    while (inst->runCount > 1) {
+        for (int i = 0; i < inst->runCount - 1; i += 2) {
+            int end = i + 2 >= inst->runCount ? length : runs[i + 2];
+            merge(inst, array, runs[i], runs[i + 1], end);
         }
-        currun = runs->next;
-        for (int i = 1; i < runs->runCount; i++) {
-            runlist_remove(runs, currun);
-            currun = currun->next->next;
+        for (int i = 1, j = 2; i < inst->runCount; i++, j+=2, inst->runCount--) {
+            runs[i] = runs[j];
         }
     }
 
@@ -254,6 +215,5 @@ void pdmerge(PDMERGE_TYPE* array, int nmemb) {
     struct pdmerge_data inst;
     runSort(&inst, array, nmemb);
 }
-
 
 #endif

@@ -105,11 +105,9 @@ class PDMerge:
         return runs
 
     def runSort(self, array, length):
-        print(array)
         self.smallestRunSize = sys.maxsize
         runs = self.findRuns(array, length - 1)
         self.copied = [0] * self.smallestRunSize
-        print(array)
 
         while len(runs) > 1:
             for i in range(0, len(runs) - 1, 2):
