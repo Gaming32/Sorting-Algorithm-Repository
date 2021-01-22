@@ -5,6 +5,8 @@
 #include "pdmerge.h"
 
 #define LENGTH 32
+// #define SEED   time(NULL)
+#define SEED   345
 
 
 PDMERGE_TYPE randrange(PDMERGE_TYPE high) {
@@ -23,7 +25,7 @@ void printArray(PDMERGE_TYPE* array, int length) {
 
 int main() {
     PDMERGE_TYPE* array = (int*)malloc(LENGTH * sizeof(PDMERGE_TYPE));
-    srand(time(NULL));
+    srand(SEED);
     for (int i = 0; i < LENGTH; i++) {
         array[i] = randrange(LENGTH);
     }

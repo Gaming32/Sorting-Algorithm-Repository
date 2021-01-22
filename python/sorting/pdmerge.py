@@ -1,3 +1,4 @@
+import sys
 from sorting import common
 
 
@@ -43,7 +44,7 @@ class PDMerge:
         right = end - 1
 
         while right > left and left >= start:
-            if self.copied[bufferPointer] > array[left]:
+            if self.copied[bufferPointer] >= array[left]:
                 array[right] = self.copied[bufferPointer]
                 right -= 1
                 bufferPointer -= 1
@@ -104,9 +105,11 @@ class PDMerge:
         return runs
 
     def runSort(self, array, length):
-        self.smallestRunSize = 0
+        print(array)
+        self.smallestRunSize = sys.maxsize
         runs = self.findRuns(array, length - 1)
         self.copied = [0] * self.smallestRunSize
+        print(array)
 
         while len(runs) > 1:
             for i in range(0, len(runs) - 1, 2):
@@ -124,9 +127,11 @@ def sort(seq):
 
 
 if __name__ == '__main__':
-    import random
-    length = 32
-    arr = [random.randrange(length) for _ in range(length)]
-    print(arr)
-    sort(arr)
-    print(arr)
+    import stable_checker
+    stable_checker.simple_sort(sort, list_size=32)
+    # import random
+    # length = 32
+    # arr = [random.randrange(length) for _ in range(length)]
+    # print(arr)
+    # sort(arr)
+    # print(arr)

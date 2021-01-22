@@ -96,15 +96,16 @@ UsableCallable = Callable[[List[IntegerWrapper]], Any]
 def generate_keyed_list(vals: Iterable[int]) -> Generator[IntegerWrapper]:
     cur_key = {}
     for prim in vals:
-        cur_key.setdefault(prim, cur_key.get(prim, -1) + 1)
+        cur_key[prim] = cur_key.get(prim, -1) + 1
         yield IntegerWrapper.wrap_int(prim, cur_key[prim])
 
 
-def simple_sort(func: UsableCallable, shuffler: UsableCallable = random.shuffle, list_size=4096, list_start=1, num_equal=4) -> List[IntegerWrapper]:
+def simple_sort(func: UsableCallable, shuffler: UsableCallable = random.shuffle, list_size=32, list_start=1, num_equal=4) -> List[IntegerWrapper]:
     # Create the list
-    use_list = list(generate_keyed_list(generate_list(list_size, list_start, num_equal)))
+    use_list = list(generate_list(list_size, list_start, num_equal))
 
     shuffler(use_list) # Shuffle the list
+    use_list = list(generate_keyed_list(use_list))
     func(use_list) # Sort the list
 
     return use_list
