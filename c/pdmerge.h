@@ -53,8 +53,6 @@ SOFTWARE.
 
 
 struct pdmerge_data {
-    int smallestRunSize;
-    int copiedLength;
     PDMERGE_TYPE* copied;
     int runCount;
 };
@@ -72,16 +70,7 @@ void reverse(PDMERGE_TYPE* array, int i, int j) {
 }
 
 
-void ensureCapacity(struct pdmerge_data *inst, int length) {
-    if (length > inst->copiedLength) {
-        inst->copied = realloc(inst->copied, length * sizeof(PDMERGE_TYPE));
-        inst->copiedLength = length;
-    }
-}
-
-
 void mergeUp(struct pdmerge_data *inst, PDMERGE_TYPE* array, int start, int mid, int end) {
-    ensureCapacity(inst, mid - start);
     for (int i = 0; i < mid - start; i++) {
         inst->copied[i] = array[i + start];
     }
@@ -103,7 +92,6 @@ void mergeUp(struct pdmerge_data *inst, PDMERGE_TYPE* array, int start, int mid,
 
 
 void mergeDown(struct pdmerge_data *inst, PDMERGE_TYPE* array, int start, int mid, int end) {
-    ensureCapacity(inst, end - mid);
     for (int i = 0; i < end - mid; i++) {
         inst->copied[i] = array[i + mid];
     }
@@ -169,19 +157,13 @@ int identifyRun(struct pdmerge_data *inst, PDMERGE_TYPE* array, int index, int m
 
 int* findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int maxIndex) {
     int* runs = malloc((maxIndex + 2) / 2 * sizeof(int));
-    runs[0] = 0;
-    inst->runCount = 1;
+    inst->runCount = 0;
 
     int lastRun = 0;
     while (lastRun != -1) {
-        int newRun = identifyRun(inst, array, lastRun, maxIndex);
-        if (newRun == -1) {
-            inst->smallestRunSize = min(inst->smallestRunSize, maxIndex - lastRun + 1);
-            break;
-        }
-        inst->smallestRunSize = min(inst->smallestRunSize, newRun - lastRun + 1);
-        lastRun = newRun;
         runs[inst->runCount++] = lastRun;
+        int newRun = identifyRun(inst, array, lastRun, maxIndex);
+        lastRun = newRun;
     }
 
     return runs;
@@ -189,11 +171,8 @@ int* findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int maxIndex) {
 
 
 void runSort(struct pdmerge_data *inst, PDMERGE_TYPE* array, int length) {
-    inst->smallestRunSize = INT_MAX;
     int* runs = findRuns(inst, array, length - 1);
-    // goto bye;
-    inst->copiedLength = inst->smallestRunSize;
-    inst->copied = malloc(inst->smallestRunSize * sizeof(PDMERGE_TYPE));
+    inst->copied = malloc(length / 2 * sizeof(PDMERGE_TYPE));
 
     while (inst->runCount > 1) {
         for (int i = 0; i < inst->runCount - 1; i += 2) {
@@ -205,7 +184,6 @@ void runSort(struct pdmerge_data *inst, PDMERGE_TYPE* array, int length) {
         }
     }
 
-    // bye:
     free(inst->copied);
     free(runs);
 }
