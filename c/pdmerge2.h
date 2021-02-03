@@ -17,7 +17,7 @@ You must #define PDMERGE_TYPE and PDMERGE_COMPARE
 /*
 MIT License
 
-Copyright (c) 2020 Gaming32
+Copyright (c) 2021 Gaming32
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,8 @@ SOFTWARE.
 
 #include "utils.h"
 
+#define MIN_RUN_SIZE 16
+
 
 struct pdmerge_data {
     PDMERGE_TYPE* copied;
@@ -63,6 +65,18 @@ void reverse(PDMERGE_TYPE* array, int i, int j) {
         j--;
     }
     
+}
+
+
+void insertSort(PDMERGE_TYPE* array, int start, int end) {
+    int pos, cur;
+    for (int i = start + 1; i < end; i++) {
+        cur = array[i];
+        pos = i - 1;
+        while (pos >= start && PDMERGE_COMPARE(array[pos], cur) > 0)
+            array[pos + 1] = array[pos--];
+        array[pos + 1] = cur;
+    }
 }
 
 
@@ -141,6 +155,14 @@ int identifyRun(struct pdmerge_data *inst, PDMERGE_TYPE* array, int index, int m
         index++;
     }
 
+    int length = index - startIndex + 1;
+    if (length < MIN_RUN_SIZE) {
+        int end = startIndex + MIN_RUN_SIZE;
+        if (end > maxIndex + 1)
+            end = maxIndex + 1;
+        insertSort(array, startIndex, end);
+        return end > maxIndex ? -1 : end;
+    }
     if (!cmp) {
         reverse(array, startIndex, index);
     }
