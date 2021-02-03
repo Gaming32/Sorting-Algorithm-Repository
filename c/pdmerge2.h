@@ -73,8 +73,10 @@ void insertSort(PDMERGE_TYPE* array, int start, int end) {
     for (int i = start + 1; i < end; i++) {
         cur = array[i];
         pos = i - 1;
-        while (pos >= start && PDMERGE_COMPARE(array[pos], cur) > 0)
-            array[pos + 1] = array[pos--];
+        while (pos >= start && PDMERGE_COMPARE(array[pos], cur) > 0) {
+            array[pos + 1] = array[pos];
+            pos--;
+        }
         array[pos + 1] = cur;
     }
 }
