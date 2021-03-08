@@ -2,18 +2,20 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "pdmerge.h"
+#include "double_insertion.h"
+#define SORT_TYPE DOUBLE_INSERTION_TYPE
+#define SORT_FUNC double_insertion
 
 #define LENGTH 32
 #define SEED   time(NULL)
 
 
-PDMERGE_TYPE randrange(PDMERGE_TYPE high) {
-    return (PDMERGE_TYPE)(rand() * high / RAND_MAX);
+SORT_TYPE randrange(SORT_TYPE high) {
+    return (SORT_TYPE)(rand() * high / RAND_MAX);
 }
 
 
-void printArray(PDMERGE_TYPE* array, int length) {
+void printArray(SORT_TYPE* array, int length) {
     printf("[%i", array[0]);
     for (int i = 1; i < length; i++) {
         printf(", %i", array[i]);
@@ -23,12 +25,12 @@ void printArray(PDMERGE_TYPE* array, int length) {
 
 
 int main() {
-    PDMERGE_TYPE* array = (int*)malloc(LENGTH * sizeof(PDMERGE_TYPE));
+    SORT_TYPE* array = (int*)malloc(LENGTH * sizeof(SORT_TYPE));
     srand(SEED);
     for (int i = 0; i < LENGTH; i++) {
         array[i] = randrange(LENGTH);
     }
     printArray(array, LENGTH);
-    pdmerge(array, LENGTH);
+    SORT_FUNC(array, LENGTH);
     printArray(array, LENGTH);
 }
