@@ -6,7 +6,7 @@
 #define SORT_TYPE DOUBLE_INSERTION_TYPE
 #define SORT_FUNC double_insertion
 
-#define LENGTH 32
+#define LENGTH 512
 #define SEED   time(NULL)
 
 
@@ -30,7 +30,9 @@ int main() {
     for (int i = 0; i < LENGTH; i++) {
         array[i] = randrange(LENGTH);
     }
-    printArray(array, LENGTH);
+    // printArray(array, LENGTH);
+    long startTime = clock();
     SORT_FUNC(array, LENGTH);
-    printArray(array, LENGTH);
+    printf("Time took: %f seconds\n", (double)(clock() - startTime) / CLOCKS_PER_SEC);
+    // printArray(array, LENGTH);
 }
