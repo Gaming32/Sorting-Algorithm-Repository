@@ -69,7 +69,8 @@ void insertDown(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, bool 
 
 
 void insertionSort(DOUBLE_INSERTION_TYPE* start, DOUBLE_INSERTION_TYPE* end) {
-    int *left = start + (end - start) / 2 - 1, *right = left + 1;
+    DOUBLE_INSERTION_TYPE *left = start + (end - start) / 2 - 1;
+    DOUBLE_INSERTION_TYPE *right = left + 1;
     if (DOUBLE_INSERTION_COMPARE(*left, *right) > 0) {
         DOUBLE_INSERTION_TYPE tmp;
         swap(left, right, tmp);
@@ -80,7 +81,8 @@ void insertionSort(DOUBLE_INSERTION_TYPE* start, DOUBLE_INSERTION_TYPE* end) {
     while (left >= start && right < end)
     {
         bool swapped;
-        DOUBLE_INSERTION_TYPE leftItem, rightItem;
+        DOUBLE_INSERTION_TYPE leftItem;
+        DOUBLE_INSERTION_TYPE rightItem;
         if (DOUBLE_INSERTION_COMPARE(*left, *right) > 0) {
             leftItem = *right;
             rightItem = *left;

@@ -168,7 +168,7 @@ int* findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int maxIndex) {
 
 void runSort(struct pdmerge_data *inst, PDMERGE_TYPE* array, int length) {
     int* runs = findRuns(inst, array, length - 1);
-    inst->copied = (int*)malloc(length / 2 * sizeof(PDMERGE_TYPE));
+    inst->copied = (PDMERGE_TYPE*)malloc(length / 2 * sizeof(PDMERGE_TYPE));
 
     while (inst->runCount > 1) {
         for (int i = 0; i < inst->runCount - 1; i += 2) {
