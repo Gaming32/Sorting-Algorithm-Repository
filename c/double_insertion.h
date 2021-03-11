@@ -50,21 +50,20 @@ SOFTWARE.
 
 void insertUp(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, bool canEqual) {
     int cmp = canEqual ? 0 : -1;
-    while (DOUBLE_INSERTION_COMPARE(*pos, current) <= cmp) {
-        *(pos - 1) = *pos;
-        pos++;
-    }
-    *(pos - 1) = current;
+    DOUBLE_INSERTION_TYPE* last = pos - 1;
+    while (DOUBLE_INSERTION_COMPARE(*pos, current) <= cmp)
+        *last++ = *pos++;
+    *last = current;
 }
 
 
 void insertDown(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, bool canEqual) {
     int cmp = canEqual ? 0 : 1;
+    DOUBLE_INSERTION_TYPE* last = pos + 1;
     while (DOUBLE_INSERTION_COMPARE(*pos, current) >= cmp) {
-        *(pos + 1) = *pos;
-        pos--;
+        *last-- = *pos--;
     }
-    *(pos + 1) = current;
+    *last = current;
 }
 
 

@@ -5,6 +5,10 @@
 #define PDMERGE_COMPARE(a, b) (PyObject_RichCompareBool((a), (b), Py_LT) > 0 ? -1 : (PyObject_RichCompareBool((a), (b), Py_GT) > 0 ? 1 : 0))
 #include "pdmerge.h"
 
+#define PDMERGE2_TYPE PyObject*
+#define PDMERGE2_COMPARE(a, b) (PyObject_RichCompareBool((a), (b), Py_LT) > 0 ? -1 : (PyObject_RichCompareBool((a), (b), Py_GT) > 0 ? 1 : 0))
+#include "pdmerge2.h"
+
 #define DOUBLE_INSERTION_TYPE PyObject*
 #define DOUBLE_INSERTION_COMPARE(a, b) (PyObject_RichCompareBool((a), (b), Py_LT) > 0 ? -1 : (PyObject_RichCompareBool((a), (b), Py_GT) > 0 ? 1 : 0))
 #include "double_insertion.h"
@@ -26,6 +30,10 @@ static PyObject* pysorting_pdmerge(PyObject* self, PyObject* args) {
     SORT_FUNCTION(args, pdmerge);
 }
 
+static PyObject* pysorting_pdmerge2(PyObject* self, PyObject* args) {
+    SORT_FUNCTION(args, pdmerge2);
+}
+
 static PyObject* pysorting_double_insertion(PyObject* self, PyObject* args) {
     SORT_FUNCTION(args, double_insertion);
 }
@@ -34,6 +42,8 @@ static PyObject* pysorting_double_insertion(PyObject* self, PyObject* args) {
 static PyMethodDef PysortingMethods[] = {
     {"pdmerge", pysorting_pdmerge, METH_VARARGS,
      "pdmerge(list_to_sort: list)\n--\n\nSort the list with pdmerge"},
+    {"pdmerge2", pysorting_pdmerge, METH_VARARGS,
+     "pdmerge2(list_to_sort: list)\n--\n\nSort the list with pdmerge2"},
     {"double_insertion", pysorting_double_insertion, METH_VARARGS,
      "double_insertion(list_to_sort: list)\n--\n\nSort the list with double insertion"},
     {NULL, NULL, 0, NULL}
