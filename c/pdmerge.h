@@ -150,7 +150,7 @@ int pdmerge_identifyRun(struct pdmerge_data *inst, PDMERGE_TYPE* array, int inde
 
 
 int* pdmerge_findRuns(struct pdmerge_data *inst, PDMERGE_TYPE* array, int maxIndex) {
-    int* runs = (int*)malloc((maxIndex + 2) / 2 * sizeof(int));
+    int* runs = (int*)malloc((maxIndex / 2 + 2) * sizeof(int));
     inst->runCount = 0;
 
     int lastRun = 0;
