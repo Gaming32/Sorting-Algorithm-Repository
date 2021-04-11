@@ -68,10 +68,10 @@ void pdmerge2_reverse(PDMERGE2_TYPE* array, int i, int j) {
 }
 
 
-void pdmerge2_insertSort(PDMERGE2_TYPE* array, int start, int end) {
+void pdmerge2_insertSort(PDMERGE2_TYPE* array, int start, int mid, int end) {
     int pos;
     PDMERGE2_TYPE cur;
-    for (int i = start + 1; i < end; i++) {
+    for (int i = mid; i < end; i++) {
         cur = array[i];
         pos = i - 1;
         while (pos >= start && PDMERGE2_COMPARE(array[pos], cur) > 0) {
@@ -156,16 +156,16 @@ int pdmerge2_identifyRun(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int i
         index++;
     }
 
+    if (!cmp) {
+        pdmerge2_reverse(array, startIndex, index);
+    }
     int length = index - startIndex + 1;
     if (length < PDMERGE2_MIN_RUN_SIZE) {
         int end = startIndex + PDMERGE2_MIN_RUN_SIZE;
         if (end > maxIndex + 1)
             end = maxIndex + 1;
-        pdmerge2_insertSort(array, startIndex, end);
+        pdmerge2_insertSort(array, startIndex, index + 1, end);
         return end > maxIndex ? -1 : end;
-    }
-    if (!cmp) {
-        pdmerge2_reverse(array, startIndex, index);
     }
     if (index >= maxIndex) {
         return -1;
