@@ -52,15 +52,16 @@ SOFTWARE.
 
 struct pdmerge2_data {
     PDMERGE2_TYPE* copied;
-    int runCount;
+    size_t runCount;
 };
 
 
-void pdmerge2_reverse(PDMERGE2_TYPE* array, int i, int j) {
+void pdmerge2_reverse(PDMERGE2_TYPE* i, PDMERGE2_TYPE* j) {
+    PDMERGE2_TYPE tmp;
     while (i < j) {
-        PDMERGE2_TYPE tmp = array[i];
-        array[i] = array[j];
-        array[j] = tmp;
+        tmp = *i;
+        *i = *j;
+        *j = tmp;
         i++;
         j--;
     }
@@ -68,29 +69,32 @@ void pdmerge2_reverse(PDMERGE2_TYPE* array, int i, int j) {
 }
 
 
-void pdmerge2_insertSort(PDMERGE2_TYPE* array, int start, int mid, int end) {
-    int pos;
+void pdmerge2_insertSort(PDMERGE2_TYPE* start, PDMERGE2_TYPE* mid, PDMERGE2_TYPE* end) {
+    PDMERGE2_TYPE* pos;
+    PDMERGE2_TYPE* pos1;
     PDMERGE2_TYPE cur;
-    for (int i = mid; i < end; i++) {
-        cur = array[i];
-        pos = i - 1;
-        while (pos >= start && PDMERGE2_COMPARE(array[pos], cur) > 0) {
-            array[pos + 1] = array[pos];
+    for (PDMERGE2_TYPE* i = mid; i < end; i++) {
+        cur = *i;
+        pos = i;
+        pos1 = i + 1;
+        while (pos >= start && PDMERGE2_COMPARE(*pos, cur) > 0) {
+            *pos1 = *pos;
             pos--;
+            pos1--;
         }
-        array[pos + 1] = cur;
+        *pos1 = cur;
     }
 }
 
 
-void pdmerge2_mergeUp(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int start, int mid, int end) {
-    for (int i = 0; i < mid - start; i++) {
+void pdmerge2_mergeUp(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, size_t start, size_t mid, size_t end) {
+    for (size_t i = 0; i < mid - start; i++) {
         inst->copied[i] = array[i + start];
     }
 
-    int bufferPointer = 0;
-    int left = start;
-    int right = mid;
+    size_t bufferPointer = 0;
+    size_t left = start;
+    size_t right = mid;
 
     while (left < right && right < end) {
         if (PDMERGE2_COMPARE(inst->copied[bufferPointer], array[right]) <= 0)
@@ -104,14 +108,14 @@ void pdmerge2_mergeUp(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int star
 }
 
 
-void pdmerge2_mergeDown(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int start, int mid, int end) {
-    for (int i = 0; i < end - mid; i++) {
+void pdmerge2_mergeDown(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, size_t start, size_t mid, size_t end) {
+    for (size_t i = 0; i < end - mid; i++) {
         inst->copied[i] = array[i + mid];
     }
 
-    int bufferPointer = end - mid - 1;
-    int left = mid - 1;
-    int right = end - 1;
+    size_t bufferPointer = end - mid - 1;
+    size_t left = mid - 1;
+    size_t right = end - 1;
 
     while (right > left && left >= start) {
         if (PDMERGE2_COMPARE(inst->copied[bufferPointer], array[left]) >= 0)
@@ -125,7 +129,7 @@ void pdmerge2_mergeDown(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int st
 }
 
 
-void pdmerge2_merge(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int leftStart, int rightStart, int end) {
+void pdmerge2_merge(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, size_t leftStart, size_t rightStart, size_t end) {
     if (end - rightStart < rightStart - leftStart) {
         pdmerge2_mergeDown(inst, array, leftStart, rightStart, end);
     }
@@ -138,8 +142,8 @@ void pdmerge2_merge(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int leftSt
 #define pdmerge2_searchCompare(a, b) PDMERGE2_COMPARE(a, b) <= 0
 
 
-int pdmerge2_identifyRun(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int index, int maxIndex) {
-    int startIndex = index;
+size_t pdmerge2_identifyRun(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, size_t index, size_t maxIndex) {
+    size_t startIndex = index;
 
     if (index >= maxIndex) {
         return -1;
@@ -157,14 +161,14 @@ int pdmerge2_identifyRun(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int i
     }
 
     if (!cmp) {
-        pdmerge2_reverse(array, startIndex, index);
+        pdmerge2_reverse(array + startIndex, array + index);
     }
-    int length = index - startIndex + 1;
+    size_t length = index - startIndex + 1;
     if (length < PDMERGE2_MIN_RUN_SIZE) {
-        int end = startIndex + PDMERGE2_MIN_RUN_SIZE;
+        size_t end = startIndex + PDMERGE2_MIN_RUN_SIZE;
         if (end > maxIndex + 1)
             end = maxIndex + 1;
-        pdmerge2_insertSort(array, startIndex, index + 1, end);
+        pdmerge2_insertSort(array + startIndex, array + index + 1, array + end);
         return end > maxIndex ? -1 : end;
     }
     if (index >= maxIndex) {
@@ -174,14 +178,14 @@ int pdmerge2_identifyRun(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int i
 }
 
 
-int* pdmerge2_findRuns(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int maxIndex) {
-    int* runs = (int*)malloc((maxIndex / PDMERGE2_MIN_RUN_SIZE + 2) * sizeof(int));
+size_t* pdmerge2_findRuns(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, size_t maxIndex) {
+    size_t* runs = (size_t*)malloc((maxIndex / PDMERGE2_MIN_RUN_SIZE + 2) * sizeof(size_t));
     inst->runCount = 0;
 
-    int lastRun = 0;
+    size_t lastRun = 0;
     while (lastRun != -1) {
         runs[inst->runCount++] = lastRun;
-        int newRun = pdmerge2_identifyRun(inst, array, lastRun, maxIndex);
+        size_t newRun = pdmerge2_identifyRun(inst, array, lastRun, maxIndex);
         lastRun = newRun;
     }
 
@@ -189,16 +193,16 @@ int* pdmerge2_findRuns(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int max
 }
 
 
-void pdmerge2_runSort(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int length) {
-    int* runs = pdmerge2_findRuns(inst, array, length - 1);
+void pdmerge2_runSort(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, size_t length) {
+    size_t* runs = pdmerge2_findRuns(inst, array, length - 1);
     inst->copied = (PDMERGE2_TYPE*)malloc(length / 2 * sizeof(PDMERGE2_TYPE));
 
     while (inst->runCount > 1) {
-        for (int i = 0; i < inst->runCount - 1; i += 2) {
-            int end = i + 2 >= inst->runCount ? length : runs[i + 2];
+        for (size_t i = 0; i < inst->runCount - 1; i += 2) {
+            size_t end = i + 2 >= inst->runCount ? length : runs[i + 2];
             pdmerge2_merge(inst, array, runs[i], runs[i + 1], end);
         }
-        for (int i = 1, j = 2; i < inst->runCount; i++, j+=2, inst->runCount--) {
+        for (size_t i = 1, j = 2; i < inst->runCount; i++, j+=2, inst->runCount--) {
             runs[i] = runs[j];
         }
     }
@@ -208,7 +212,7 @@ void pdmerge2_runSort(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, int leng
 }
 
 
-void pdmerge2(PDMERGE2_TYPE* array, int nmemb) {
+void pdmerge2(PDMERGE2_TYPE* array, size_t nmemb) {
     struct pdmerge2_data inst;
     pdmerge2_runSort(&inst, array, nmemb);
 }

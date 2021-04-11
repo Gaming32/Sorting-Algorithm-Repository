@@ -104,7 +104,7 @@ void insertionSort(DOUBLE_INSERTION_TYPE* start, DOUBLE_INSERTION_TYPE* end) {
 }
 
 
-void double_insertion(DOUBLE_INSERTION_TYPE* array, int nmemb) {
+void double_insertion(DOUBLE_INSERTION_TYPE* array, size_t nmemb) {
     insertionSort(array, array + nmemb);
 }
 
