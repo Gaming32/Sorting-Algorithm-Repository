@@ -17,7 +17,7 @@ You must #define DOUBLE_INSERTION_TYPE and DOUBLE_INSERTION_COMPARE
 /*
 MIT License
 
-Copyright (c) 2021 Gaming32 and Morwenn
+Copyright (c) 2020-2021 Gaming32 and Morwenn
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
