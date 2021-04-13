@@ -48,19 +48,19 @@ SOFTWARE.
 #include "utils.h"
 
 
-void insertUp(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, bool canEqual) {
-    int cmp = canEqual ? 0 : -1;
+void insertUp(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, char cmp) {
+    // int cmp = canEqual ? 0 : -1;
     DOUBLE_INSERTION_TYPE* last = pos - 1;
-    while (DOUBLE_INSERTION_COMPARE(*pos, current) <= cmp)
+    while (DOUBLE_INSERTION_COMPARE(*pos, current) < cmp)
         *last++ = *pos++;
     *last = current;
 }
 
 
-void insertDown(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, bool canEqual) {
-    int cmp = canEqual ? 0 : 1;
+void insertDown(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, char cmp) {
+    // int cmp = canEqual ? 0 : 1;
     DOUBLE_INSERTION_TYPE* last = pos + 1;
-    while (DOUBLE_INSERTION_COMPARE(*pos, current) >= cmp) {
+    while (DOUBLE_INSERTION_COMPARE(*pos, current) > cmp) {
         *last-- = *pos--;
     }
     *last = current;
@@ -79,28 +79,31 @@ void insertionSort(DOUBLE_INSERTION_TYPE* start, DOUBLE_INSERTION_TYPE* end) {
 
     while (left >= start && right < end)
     {
-        bool swapped;
+        char leftCmp, rightCmp;
         DOUBLE_INSERTION_TYPE leftItem;
         DOUBLE_INSERTION_TYPE rightItem;
         if (DOUBLE_INSERTION_COMPARE(*left, *right) > 0) {
             leftItem = *right;
             rightItem = *left;
-            swapped = true;
+            leftCmp = 1;
+            rightCmp = -1;
+            // swapped = true;
         }
         else {
             leftItem = *left;
             rightItem = *right;
-            swapped = false;
+            leftCmp = rightCmp = 0;
+            // swapped = false;
         }
 
-        insertUp(left + 1, leftItem, swapped);
-        insertDown(right - 1, rightItem, swapped);
+        insertUp(left + 1, leftItem, leftCmp);
+        insertDown(right - 1, rightItem, rightCmp);
 
         left--;
         right++;
     }
 
-    if (right < end) insertDown(right - 1, *right, false);
+    if (right < end) insertDown(right - 1, *right, 0);
 }
 
 

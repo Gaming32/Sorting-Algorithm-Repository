@@ -31,8 +31,6 @@ int main() {
         array[i] = randrange(LENGTH);
     }
     printArray(array, LENGTH + 6);
-    long startTime = clock();
     SORT_FUNC(array, LENGTH);
-    printf("Time took: %f seconds\n", (double)(clock() - startTime) / CLOCKS_PER_SEC);
     printArray(array, LENGTH + 6);
 }
