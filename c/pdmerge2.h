@@ -146,7 +146,7 @@ size_t pdmerge2_identifyRun(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, si
     size_t startIndex = index;
 
     if (index >= maxIndex) {
-        return -1;
+        return SIZE_MAX;
     }
 
     bool cmp = pdmerge2_searchCompare(array[index], array[index + 1]);
@@ -172,7 +172,7 @@ size_t pdmerge2_identifyRun(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, si
         return end > maxIndex ? -1 : end;
     }
     if (index >= maxIndex) {
-        return -1;
+        return SIZE_MAX;
     }
     return index + 1;
 }
@@ -183,7 +183,7 @@ size_t* pdmerge2_findRuns(struct pdmerge2_data *inst, PDMERGE2_TYPE* array, size
     inst->runCount = 0;
 
     size_t lastRun = 0;
-    while (lastRun != -1) {
+    while (lastRun != SIZE_MAX) {
         runs[inst->runCount++] = lastRun;
         size_t newRun = pdmerge2_identifyRun(inst, array, lastRun, maxIndex);
         lastRun = newRun;
