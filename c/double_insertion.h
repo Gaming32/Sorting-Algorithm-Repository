@@ -48,27 +48,8 @@ SOFTWARE.
 #include "utils.h"
 
 
-void insertUp(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, char cmp) {
-    // int cmp = canEqual ? 0 : -1;
-    DOUBLE_INSERTION_TYPE* last = pos - 1;
-    while (DOUBLE_INSERTION_COMPARE(*pos, current) < cmp)
-        *last++ = *pos++;
-    *last = current;
-}
-
-
-void insertDown(DOUBLE_INSERTION_TYPE* pos, DOUBLE_INSERTION_TYPE current, char cmp) {
-    // int cmp = canEqual ? 0 : 1;
-    DOUBLE_INSERTION_TYPE* last = pos + 1;
-    while (DOUBLE_INSERTION_COMPARE(*pos, current) > cmp) {
-        *last-- = *pos--;
-    }
-    *last = current;
-}
-
-
 void insertionSort(DOUBLE_INSERTION_TYPE* start, DOUBLE_INSERTION_TYPE* end) {
-    DOUBLE_INSERTION_TYPE *left = start + (end - start) / 2 - 1;
+    DOUBLE_INSERTION_TYPE *left  = start + (end - start) / 2 - 1;
     DOUBLE_INSERTION_TYPE *right = left + 1;
     if (DOUBLE_INSERTION_COMPARE(*left, *right) > 0) {
         DOUBLE_INSERTION_TYPE tmp;
@@ -77,35 +58,60 @@ void insertionSort(DOUBLE_INSERTION_TYPE* start, DOUBLE_INSERTION_TYPE* end) {
     left--;
     right++;
 
+    DOUBLE_INSERTION_TYPE leftItem, rightItem, *pos, *pos1;
     while (left >= start && right < end)
     {
-        char leftCmp, rightCmp;
-        DOUBLE_INSERTION_TYPE leftItem;
-        DOUBLE_INSERTION_TYPE rightItem;
         if (DOUBLE_INSERTION_COMPARE(*left, *right) > 0) {
-            leftItem = *right;
+            leftItem  = *right;
             rightItem = *left;
-            leftCmp = 1;
-            rightCmp = -1;
-            // swapped = true;
+
+            pos  =  left + 1;
+            pos1 =  left;
+            while (pos <= right && DOUBLE_INSERTION_COMPARE(*pos, leftItem) <= 0) {
+                *pos1++ = *pos++;
+            }
+            *pos1 = leftItem;
+
+            pos  =  right - 1;
+            pos1 =  right;
+            while (pos >= left && DOUBLE_INSERTION_COMPARE(*pos, rightItem) >= 0) {
+                *pos1-- = *pos--;
+            }
+            *pos1 = rightItem;
         }
         else {
-            leftItem = *left;
+            leftItem  = *left;
             rightItem = *right;
-            leftCmp = rightCmp = 0;
-            // swapped = false;
-        }
 
-        insertUp(left + 1, leftItem, leftCmp);
-        insertDown(right - 1, rightItem, rightCmp);
+            pos  =  left + 1;
+            pos1 =  left;
+            while (DOUBLE_INSERTION_COMPARE(*pos, leftItem) < 0) {
+                *pos1++ = *pos++;
+            }
+            *pos1 = leftItem;
+
+            pos  =  right - 1;
+            pos1 =  right;
+            while (DOUBLE_INSERTION_COMPARE(*pos, rightItem) > 0) {
+                *pos1-- = *pos--;
+            }
+            *pos1 = rightItem;
+        }
 
         left--;
         right++;
     }
 
-    if (right < end) insertDown(right - 1, *right, 0);
+    if (right < end) {
+        rightItem  = *right;
+        pos        =  right - 1;
+        pos1       =  right;
+        while (DOUBLE_INSERTION_COMPARE(*pos, rightItem) > 0) {
+            *pos1-- = *pos--;
+        }
+        *pos1 = rightItem;
+    }
 }
-
 
 void double_insertion(DOUBLE_INSERTION_TYPE* array, size_t nmemb) {
     insertionSort(array, array + nmemb);
